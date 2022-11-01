@@ -1,0 +1,93 @@
+name: aws-yaml
+runtime: yaml
+description: A minimal AWS Pulumi YAML program
+
+
+
+  
+configuration:
+  project_name:
+    type: String
+    default: pulumi-yaml
+  vpc_name:
+    type: String
+    default: ${project_name}-vpc
+resources:
+  main_vpc:
+    type: aws:ec2:Vpc
+    properties:
+      cidrBlock: 10.100.0.0/16
+      tags:
+        Name: ${vpc_name}
+  main_subnet:
+    type: aws:ec2:Subnet
+    properties:
+      vpcId: ${main_vpc.id}
+      cidrBlock: 10.100.1.0/24
+      mapPublicIpOnLaunch: True
+      tags:
+        Name: ${project_name}-subnet
+  internet_gateway:
+    type: aws:ec2:InternetGateway
+    properties:
+      vpcId: ${main_vpc.id}
+      tags:
+        Name: ${project_name}-igw
+  route_table:
+    type: aws:ec2:RouteTable
+    properties:
+      vpcId: ${main_vpc.id}
+      routes:
+        - cidrBlock: 0.0.0.0/0
+          gatewayId: ${internet_gateway.id}
+  route_table_assoc:
+    type: aws:ec2:RouteTableAssociation
+    properties:
+      subnetId: ${main_subnet.id}
+      routeTableId: ${route_table.id}
+  security_group:
+    type: aws:ec2:SecurityGroup
+    properties:
+      vpcId: ${main_vpc.id}
+      ingress: 
+        - protocol: -1
+          fromPort:  0
+          toPort: 0
+          cidrBlocks: 
+            - 0.0.0.0/0
+      egress: 
+        - protocol: -1
+          fromPort:  0
+          toPort: 0
+          cidrBlocks: 
+            - 0.0.0.0/0
+      tags:
+        Name: ${project_name}-sg
+  web:
+    type: aws:ec2:Instance
+    properties:
+      ami: ${ubuntu.id}
+      instanceType: t3.micro
+      tags:
+        Name: ${project_name}-instance
+variables:
+  ubuntu:
+    Fn::Invoke:
+      Function: aws:ec2:getAmi
+      Arguments:
+        mostRecent: true
+        filters:
+          - name: name
+            values:
+              - ubuntu/images/hvm-ssd/ubuntu-focal-20.04-*
+          - name: virtualization-type
+            values:
+              - hvm
+          - name: architecture
+            values: 
+              - x86_64
+#        owners:
+#          - 099720109477
+#outputs:
+  # Export the name of the bucket
+#  publicIp: ${server.publicIp}
