@@ -1,5 +1,7 @@
 """An AWS Python Pulumi program to stand up Consul"""
 
+import time
+import jinja2
 import pulumi
 import pulumi_aws as aws
 
@@ -133,6 +135,28 @@ echo "firstrun debug: finished-config"
 """
 
 
+server = aws.ec2.Instance(var_project_name + '-server',
+    instance_type=var_size,
+    vpc_security_group_ids=[group.id],
+    user_data=user_data,
+    key_name=var_key_name,
+    subnet_id=main_subnet.id,
+    ami=ami.id,
+    tags={
+        "Name": var_project_name + "-instance"
+    },
+)
+
+
+def create_template(path: str) -> jinja2.Template:
+    with open(path, 'r') as f:
+        template = jinja2.Template(f.read())
+    print(template)
+    return template
+
+file="consul_client.tpl"
+create_template(file)
+
 client_user_data="""#!/bin/bash
 FILE=/tmp/firstrun.log
 if [ ! -e $FILE ]
@@ -153,21 +177,9 @@ wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 sudo apt update && sudo apt install consul
 
-echo "consul agent -config-dir=/etc/consul.d -log-file=/var/log/consul/consul.log -data-dir=/tmp -retry-join IP" > /root/consul.sh
+echo "consul agent -config-dir=/etc/consul.d -log-file=/var/log/consul/consul.log -data-dir=/tmp -retry-join ${applied_public_ip}" > /root/consul.sh
 chmod 755 /root/consul.sh
 """
-
-server = aws.ec2.Instance(var_project_name + '-server',
-    instance_type=var_size,
-    vpc_security_group_ids=[group.id],
-    user_data=user_data,
-    key_name=var_key_name,
-    subnet_id=main_subnet.id,
-    ami=ami.id,
-    tags={
-        "Name": var_project_name + "-instance"
-    },
-)
 
 consul_client = aws.ec2.Instance(var_project_name + '-client',
     instance_type=var_size,
@@ -179,11 +191,13 @@ consul_client = aws.ec2.Instance(var_project_name + '-client',
     tags={
         "Name": var_project_name + "-client"
     },
+    opts=pulumi.ResourceOptions(depends_on=[server])
 )
+
 
 pulumi.export('public_ip', server.public_ip)
 pulumi.export('client_public_ip', consul_client.public_ip)
-pulumi.export('public_dns', server.public_dns)
+pulumi.export('applied_public_ip', applied_public_ip)
 
 print("Consul Server address is port 8500")
 
