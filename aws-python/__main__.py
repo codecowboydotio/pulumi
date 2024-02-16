@@ -2,6 +2,10 @@
 
 import pulumi
 import pulumi_aws as aws
+import json
+import string
+import random
+
 
 var_size = 't2.micro'
 var_project_name = "pulumi-python"
@@ -9,6 +13,11 @@ var_vpc_name = "vpc"
 var_key_name = 'svk_keypair'
 var_vpc_cidr_block = '10.100.0.0/16'
 var_subnet_cidr_block = '10.100.1.0/24'
+
+def gen_random(size=6, chars=string.ascii_uppercase + string.digits):
+  return ''.join(random.choice(chars) for _ in range(size))
+
+
 
 vpc = aws.ec2.Vpc(
         var_project_name + "-" + var_vpc_name, 
@@ -58,7 +67,7 @@ ami = aws.ec2.get_ami(most_recent=True,
                       filters=[
                         aws.GetAmiFilterArgs(
                           name="name", 
-                          values=["ubuntu/images/hvm-ssd/ubuntu-focal-20.04*"]
+                          values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04*"]
                         ),
                         aws.ec2.GetAmiFilterArgs(
                           name="virtualization-type",

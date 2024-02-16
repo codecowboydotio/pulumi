@@ -177,7 +177,9 @@ wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 sudo apt update && sudo apt install consul
 
-echo "consul agent -config-dir=/etc/consul.d -log-file=/var/log/consul/consul.log -data-dir=/tmp -retry-join ${applied_public_ip}" > /root/consul.sh
+MY_IP=$(curl -s http://httpbin.org/ip | grep origin| awk -F":" '{print $2}'| sed 's/"//g')
+
+echo "consul agent -config-dir=/etc/consul.d -log-file=/var/log/consul/consul.log -data-dir=/tmp -retry-join $MY_IP" > /root/consul.sh
 chmod 755 /root/consul.sh
 """
 
@@ -197,7 +199,6 @@ consul_client = aws.ec2.Instance(var_project_name + '-client',
 
 pulumi.export('public_ip', server.public_ip)
 pulumi.export('client_public_ip', consul_client.public_ip)
-pulumi.export('applied_public_ip', applied_public_ip)
 
 print("Consul Server address is port 8500")
 

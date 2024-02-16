@@ -3,13 +3,6 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-// Create an AWS resource (S3 Bucket)
-//const bucket = new aws.s3.Bucket("my-bucket");
-
-// Export the name of the bucket
-//exports.bucketName = bucket.id;
-
-
 var var_size = 't2.micro'
 var var_project_name = "pulumi-javascript"
 var var_vpc_name = "vpc"
@@ -24,7 +17,7 @@ const vpc = new aws.ec2.Vpc(var_project_name + "-" + var_vpc_name, {
   }
 });    
 
-const main_subnet = new aws.ec2.Subnet(var_project_name + "-" + var_vpc_name, {
+const main_subnet = new aws.ec2.Subnet(var_project_name + var_vpc_name + "-subnet", {
   vpcId: vpc.id,
   cidrBlock: var_subnet_cidr_block,
   mapPublicIpOnLaunch: true,
@@ -58,7 +51,7 @@ const main_route_table = new aws.ec2.RouteTable(var_project_name + "-" + var_vpc
 });
 
 
-const main_rt_assoc = new aws.ec2.RouteTableAssociation(var_project_name + "-" + var_vpc_name + "-rt", {
+const main_rt_assoc = new aws.ec2.RouteTableAssociation(var_project_name + "-" + var_vpc_name + "-rta", {
     subnetId: main_subnet.id,
     routeTableId: main_route_table.id
  }
@@ -84,4 +77,33 @@ const ami = new aws.ec2.getAmi({
   ],
 });
 
+const group = new aws.ec2.SecurityGroup(var_project_name + "-" + var_vpc_name + "-sg", {
+  description: "foo",
+  vpcId: vpc.id,
+  ingress: [{
+    description: "Ingress",
+    fromPort: 0,
+    toPort: 0,
+    protocol: "-1",
+    cidrBlocks: ["0.0.0.0/0"],
+  }],
+  egress: [{
+    fromPort: 0,
+    toPort: 0,
+    protocol: "-1",
+    cidrBlocks: ["0.0.0.0/0"],
+  }],
+});
 
+const user_data =`#!/bin/bash
+echo "foo" > /tmp/foo`
+
+const server = new aws.ec2.Instance(var_project_name + "-" + var_vpc_name + "-instance",{
+  ami: ami.then(ami => ami.id),
+  instanceType: "t2.micro", 
+  subnetId: main_subnet.id,
+  userData: user_data,
+  tags: {
+    "Name": var_project_name + "-instance",
+  },
+});

@@ -5,12 +5,12 @@ description: A minimal AWS Pulumi YAML program
 
 
   
-configuration:
+config:
   project_name:
-    type: String
+    type: string
     default: pulumi-yaml
   vpc_name:
-    type: String
+    type: string
     default: ${project_name}-vpc
 resources:
   main_vpc:
@@ -72,9 +72,9 @@ resources:
         Name: ${project_name}-instance
 variables:
   ubuntu:
-    Fn::Invoke:
-      Function: aws:ec2:getAmi
-      Arguments:
+    fn::invoke:
+      function: aws:ec2:getAmi
+      arguments:
         mostRecent: true
         filters:
           - name: name
