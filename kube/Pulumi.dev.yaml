@@ -1,0 +1,7 @@
+config:
+  aws:region: ap-southeast-2
+  kube:desiredClusterSize: "3"
+  kube:eksNodeInstanceType: t3.medium
+  kube:maxClusterSize: "3"
+  kube:minClusterSize: "3"
+  kube:vpcNetworkCidr: 10.0.0.0/16

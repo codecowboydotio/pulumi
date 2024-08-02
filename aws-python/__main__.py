@@ -10,7 +10,7 @@ import random
 var_size = 't2.micro'
 var_project_name = "pulumi-python"
 var_vpc_name = "vpc"
-var_key_name = 'svk_keypair'
+var_key_name = 'svk-keypair'
 var_vpc_cidr_block = '10.100.0.0/16'
 var_subnet_cidr_block = '10.100.1.0/24'
 
