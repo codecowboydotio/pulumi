@@ -1,6 +1,13 @@
 config:
-  aws:region: ap-southeast-2
-  cfg:cluster-name: dev-cluster
-  cfg:service-name: my-service
+  aws:region: us-east-1
+  cfg:cluster-name: svk-dev-cluster
+  cfg:service-name: swapi-service
   cfg:host-port: "80"
   cfg:container-port: "80"
+  aws:defaultTags:
+    tags:
+      approver: "marc.brown"
+      expirationDate: "never"
+      owner: "scott.vankalken"
+      purpose: "SE testing"
+

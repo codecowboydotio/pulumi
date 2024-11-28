@@ -12,6 +12,7 @@ var_container_port= int(stack_config.require("container-port"))
 repository = awsx.ecr.Repository(
     "repository",
     awsx.ecr.RepositoryArgs(
+        name=var_cluster_name + "-repo",
         force_delete=True
     ),
 )
@@ -26,12 +27,14 @@ image = awsx.ecr.Image(
 cluster = aws.ecs.Cluster("cluster",
     name=var_cluster_name,)
 lb = awsx.lb.ApplicationLoadBalancer("lb",
+    name=var_cluster_name + "-lb",
     default_target_group_port=var_host_port,
 )
 
 service = awsx.ecs.FargateService(
     "service",
     awsx.ecs.FargateServiceArgs(
+        name=var_cluster_name + "-" + var_service_name,
         cluster=cluster.arn,
         assign_public_ip=True,
         task_definition_args=awsx.ecs.FargateServiceTaskDefinitionArgs(
@@ -54,3 +57,4 @@ service = awsx.ecs.FargateService(
 )
 
 pulumi.export("url", pulumi.Output.format("http://{0}:{1}", lb.load_balancer.dns_name, var_host_port))
+
