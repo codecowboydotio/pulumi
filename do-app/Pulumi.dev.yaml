@@ -1,0 +1,5 @@
+config:
+  cfg:app-name: python-app
+  cfg:app-size: apps-s-1vcpu-1gb
+  cfg:service-name: py-service
+  cfg:branch: main
