@@ -1,0 +1,6 @@
+config:
+  cfg:cluster-name: do-pulumi-k8s
+  cfg:node-name: node
+  cfg:node-size: s-1vcpu-2gb
+  cfg:node-count: "3"
+  cfg:region: syd1
