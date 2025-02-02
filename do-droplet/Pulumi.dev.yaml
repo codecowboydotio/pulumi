@@ -1,0 +1,4 @@
+config:
+  cfg:ssh-key-name: digital-ocean-key
+  cfg:image-name: ubuntu-24-04-x64
+  cfg:vm-name: do-droplet
