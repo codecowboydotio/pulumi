@@ -1,0 +1,4 @@
+*.pyc
+kubeconfig.json
+gke_gcloud_auth_plugin_cache
+venv/
