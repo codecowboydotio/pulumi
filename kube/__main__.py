@@ -9,14 +9,15 @@ max_cluster_size = config.get_float("maxClusterSize", 6)
 desired_cluster_size = config.get_float("desiredClusterSize", 3)
 eks_node_instance_type = config.get("eksNodeInstanceType", "t3.medium")
 vpc_network_cidr = config.get("vpcNetworkCidr", "10.0.0.0/16")
+cluster_name = config.get("name")
 
 # Create a VPC for the EKS cluster
-eks_vpc = awsx.ec2.Vpc("eks-vpc",
+eks_vpc = awsx.ec2.Vpc("svk-eks-vpc",
     enable_dns_hostnames=True,
     cidr_block=vpc_network_cidr)
 
 # Create the EKS cluster
-eks_cluster = eks.Cluster("eks-cluster",
+eks_cluster = eks.Cluster(cluster_name,
     # Put the cluster in the new VPC created earlier
     vpc_id=eks_vpc.vpc_id,
     # Public subnets will be used for load balancers
@@ -35,7 +36,7 @@ eks_cluster = eks.Cluster("eks-cluster",
     # endpoint_public_access=false
     )
 
-##pulumi stack output kubeconfig --show-secrets > kubeconfig
+##pulumi stack output kubeconfig --show-secrets > kubeconfig.json
 # Export values to use elsewhere
 pulumi.export("kubeconfig", eks_cluster.kubeconfig)
 pulumi.export("vpcId", eks_vpc.vpc_id)

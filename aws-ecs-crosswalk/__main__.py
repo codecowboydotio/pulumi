@@ -58,3 +58,7 @@ service = awsx.ecs.FargateService(
 
 pulumi.export("url", pulumi.Output.format("http://{0}:{1}", lb.load_balancer.dns_name, var_host_port))
 
+##pulumi stack output kubeconfig --show-secrets > kubeconfig
+# Export values to use elsewhere
+pulumi.export("kubeconfig", cluster.kubeconfig)
+
