@@ -1,4 +1,3 @@
-# us-central1-docker.pkg.dev/annular-weaver-447910-j1/my-repository/swapi
 import pulumi
 import pulumi_gcp as gcp
 
