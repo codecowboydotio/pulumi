@@ -24,18 +24,17 @@ image = awsx.ecr.Image(
     ),
 )
 
-cluster = aws.ecs.Cluster("cluster",
+ecs_cluster = aws.ecs.Cluster("cluster",
     name=var_cluster_name,)
 lb = awsx.lb.ApplicationLoadBalancer("lb",
     name=var_cluster_name + "-lb",
     default_target_group_port=var_host_port,
 )
 
-service = awsx.ecs.FargateService(
-    "service",
+service = awsx.ecs.FargateService("service",
     awsx.ecs.FargateServiceArgs(
         name=var_cluster_name + "-" + var_service_name,
-        cluster=cluster.arn,
+        cluster=ecs_cluster.arn,
         assign_public_ip=True,
         task_definition_args=awsx.ecs.FargateServiceTaskDefinitionArgs(
             container=awsx.ecs.TaskDefinitionContainerDefinitionArgs(
@@ -60,5 +59,6 @@ pulumi.export("url", pulumi.Output.format("http://{0}:{1}", lb.load_balancer.dns
 
 ##pulumi stack output kubeconfig --show-secrets > kubeconfig
 # Export values to use elsewhere
-pulumi.export("kubeconfig", cluster.kubeconfig)
+pulumi.export("cluster_info", ecs_cluster)
+pulumi.export("svc", service)
 

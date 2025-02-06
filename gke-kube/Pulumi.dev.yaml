@@ -1,4 +1,4 @@
 config:
-  gcp:project: se-demo-staging
+  gcp:project: annular-weaver-447910-j1
   gcp:region: us-central1
   gke-kube:nodesPerZone: "1"
