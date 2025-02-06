@@ -1,0 +1,3 @@
+config:
+  gcp:project: annular-weaver-447910-j1
+  gcp:region: us-central1
