@@ -1,4 +1,4 @@
 config:
-  gcp:project: annular-weaver-447910-j1
+  gcp:project: white-rigging-448421-g9
   gcp:region: us-central1
   gke-kube:nodesPerZone: "1"
