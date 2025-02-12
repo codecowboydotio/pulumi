@@ -19,12 +19,14 @@ service_account = gcp.serviceaccount.Account("service_account",
 
 project = gcp.projects.IAMBinding("project",
     project=gcp_project,
-    role="roles/artifactregistry.reader",
+    #role="roles/artifactregistry.writer",
+    #role="roles/artifactregistry.reader",
     #role="roles/editor",
+    role="roles/viewer",
     members=[service_account.email.apply(lambda email: f"serviceAccount:{email}")])
 
 
-pulumi.export("service_account", service_account)
-pulumi.export("repository", my_repo)
-pulumi.export("repository", project)
+#pulumi.export("service_account", service_account)
+#pulumi.export("repository", my_repo)
+#pulumi.export("repository", project)
 
