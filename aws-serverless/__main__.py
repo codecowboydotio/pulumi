@@ -9,25 +9,6 @@ region = aws.config.region
 
 
 ##################
-## S3 bucket for logs
-##################
-
-bucket = aws.s3.Bucket("svk-bucket",
-  bucket = "svk-lambda-bucket",
-  force_destroy=True,
-)
-
-bucket_ownership_controls = aws.s3.BucketOwnershipControls("svk-bucket-ownership",
-  bucket = bucket.id,
-  rule={
-    "object_ownership": "BucketOwnerPreferred",
-  }
-)
-
-
-
-
-##################
 ## Lambda Function
 ##################
 
@@ -40,9 +21,16 @@ lambda_func = aws.lambda_.Function(
     runtime="python3.8",
     handler="hello.handler",
     code=pulumi.AssetArchive({".": pulumi.FileArchive("./app")}),
-    
-#    s3_bucket = bucket.id,
 )
+
+log_group = aws.cloudwatch.LogGroup("svk-lambda-func",
+    #name="/aws/lambda/" + str(lambda_func.name),
+    #name=lambda_func.name.apply(lambda name: "/aws/lambda" + {str(name)}),
+    name="/aws/lambda/svk-lambda",
+    tags={
+        "Environment": "production",
+        "Application": "serviceA",
+    })
 
 
 ####################################################################
@@ -70,7 +58,6 @@ rest_api_method = aws.apigateway.Method("MyDemoMethod",
     resource_id=rest_api_resource.id,
     http_method="ANY",
     authorization="NONE")
-
 rest_api_integration = aws.apigateway.Integration("svk-api-Integration",
     rest_api=rest_api.id,
     resource_id=rest_api_resource.id,
@@ -79,13 +66,15 @@ rest_api_integration = aws.apigateway.Integration("svk-api-Integration",
     type="AWS_PROXY",
     uri=lambda_func.invoke_arn
     )
-rest_api_method = aws.apigateway.Method("svk-proxy-root",
+
+
+rest_api_method_root = aws.apigateway.Method("svk-proxy-root",
+    opts=pulumi.ResourceOptions(depends_on=[rest_api]),
     rest_api=rest_api.id,
     resource_id=rest_api.root_resource_id,
     http_method="ANY",
     authorization="NONE")
-
-rest_api_integration = aws.apigateway.Integration("svk-lambda-root",
+rest_api_integration_root = aws.apigateway.Integration("svk-lambda-root",
     rest_api=rest_api.id,
     resource_id=rest_api.root_resource_id,
     http_method=rest_api_method.http_method,
@@ -98,23 +87,40 @@ rest_api_integration = aws.apigateway.Integration("svk-lambda-root",
 ## Create a deployment of the Rest API.
 deployment = aws.apigateway.Deployment(
     "svk-api-deployment", 
-    opts=pulumi.ResourceOptions(depends_on=[rest_api_integration]),
+    opts=pulumi.ResourceOptions(depends_on=[rest_api_integration, rest_api_integration_root]),
     rest_api=rest_api.id,
-    stage_name="test",
+    stage_name="",
+    #triggers=
+)
+
+stage = aws.apigateway.Stage(
+  "svk-api-stage",
+  opts=pulumi.ResourceOptions(depends_on=[deployment]),
+  rest_api=rest_api.id,
+  deployment = deployment.id,
+  stage_name = "test",
 )
 
 # Give permissions from API Gateway to invoke the Lambda
 rest_invoke_permission = aws.lambda_.Permission(
     "svk-api-rest-lambda-permission",
+    statement_id  = "AllowAPIGatewayInvoke",
     action="lambda:invokeFunction",
     function=lambda_func.name,
     principal="apigateway.amazonaws.com",
-    source_arn=rest_api.execution_arn
-    #source_arn=deployment.execution_arn.apply(lambda arn: {arn} + "/*/*"),
+    source_arn=rest_api.execution_arn.apply(lambda arn: arn + "/*/*"),
 )
 
 
 pulumi.export(
     "svk-apigateway-rest-endpoint",
-    deployment.invoke_url.apply(lambda url: url + "/{proxy+}"),
+    deployment.invoke_url.apply(lambda url: url + f"test"),
+)
+pulumi.export(
+    "api-stuff",
+    rest_api
+)
+pulumi.export(
+    "lambda-stuff",
+    lambda_func
 )

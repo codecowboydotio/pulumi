@@ -20,20 +20,26 @@ lambda_role = iam.Role(
     }""",
 )
 
-lambda_role_policy = iam.RolePolicy(
-    "lambdaRolePolicy",
-    name="svk-lambda-role-policy",
-    role=lambda_role.id,
-    policy="""{
-        "Version": "2012-10-17",
-        "Statement": [{
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-            ],
-            "Resource": "arn:aws:logs:*:*:*"
-        }]
-    }""",
+#lambda_role_policy = iam.RolePolicy(
+#    "lambdaRolePolicy",
+#    name="svk-lambda-role-policy",
+#    role=lambda_role.id,
+#    policy="""{
+#        "Version": "2012-10-17",
+#        "Statement": [{
+#            "Effect": "Allow",
+#            "Action": [
+#                "logs:CreateLogGroup",
+#                "logs:CreateLogStream",
+#                "logs:PutLogEvents"
+#            ],
+#            "Resource": "arn:aws:logs:*:*:*"
+#        }]
+#    }""",
+#)
+
+execution_attachment = iam.PolicyAttachment("svk-execution-attach",
+    name="svk-execution-attachment",
+    roles=[lambda_role.name],
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 )
