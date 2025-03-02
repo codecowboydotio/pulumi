@@ -1,2 +1,5 @@
 config:
   aws-native:region: ap-southeast-2
+  aws-serverless:project: test-webhook
+  aws-serverless:lambda-name: hello-lambda
+  aws-serverless:name-prefix: svk
