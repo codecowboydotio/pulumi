@@ -21,8 +21,8 @@ lambda_func = aws.lambda_.Function(
   name_prefix + "-" + project + "-" + var_lambda_name,
   name=name_prefix + "-" + project + "-" + var_lambda_name,
   role=iam.lambda_role.arn,
-  runtime="python3.8",
-  handler="hello.handler",
+  runtime="python3.11",
+  handler="webhook.lambda_handler",
   code=pulumi.AssetArchive({".": pulumi.FileArchive("./app")}),
 )
 

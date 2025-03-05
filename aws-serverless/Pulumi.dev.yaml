@@ -3,3 +3,4 @@ config:
   aws-serverless:project: test-webhook
   aws-serverless:lambda-name: hello-lambda
   aws-serverless:name-prefix: svk
+  aws:region: us-east-1
