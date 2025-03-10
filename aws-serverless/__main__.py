@@ -26,12 +26,6 @@ lambda_func = aws.lambda_.Function(
   code=pulumi.AssetArchive({".": pulumi.FileArchive("./app")}),
 )
 
-#log_group = aws.cloudwatch.LogGroup(
-#  name_prefix + "-" + project + "-" + var_lambda_name,
-#  name="/aws/lambda/" + var_lambda_name,
-#  retention_in_days=5,
-#)
-
 
 ####################################################################
 ##
