@@ -1,7 +1,7 @@
 config:
   aws:region: us-east-1
   kube:desiredClusterSize: "3"
-  kube:eksNodeInstanceType: t3.medium
+  kube:eksNodeInstanceType: t3.xlarge
   kube:maxClusterSize: "3"
   kube:minClusterSize: "3"
   kube:vpcNetworkCidr: 10.0.0.0/16
@@ -9,6 +9,6 @@ config:
   aws:defaultTags:
     tags:
       approver: "marc.brown"
-      expirationDate: "2025-03-01"
+      expirationDate: "2025-04-01"
       owner: "scott.vankalken"
       purpose: "testing"

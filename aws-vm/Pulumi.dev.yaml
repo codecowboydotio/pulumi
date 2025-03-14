@@ -1,2 +1,8 @@
 config:
-  aws:region: ap-southeast-2
+  aws:region: us-east-1
+  aws:defaultTags:
+    tags:
+      purpose: "testing"
+      approver: "marc.brown"
+      expirationDate: "2025-03-14"
+      owner: "scott.vankalken"
