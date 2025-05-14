@@ -120,5 +120,3 @@ server = aws.ec2.Instance(var_project_name + '-server',
 
 pulumi.export('public_ip', server.public_ip)
 pulumi.export('public_dns', server.public_dns)
-
-
