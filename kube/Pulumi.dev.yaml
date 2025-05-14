@@ -9,6 +9,6 @@ config:
   aws:defaultTags:
     tags:
       approver: "marc.brown"
-      expirationDate: "2025-04-01"
+      expirationDate: "2025-06-01"
       owner: "scott.vankalken"
       purpose: "testing"

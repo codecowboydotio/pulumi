@@ -17,12 +17,12 @@ repository = awsx.ecr.Repository(
     ),
 )
 
-image = awsx.ecr.Image(
-    "image",
-    awsx.ecr.ImageArgs(
-        repository_url=repository.url, context="/root/swapi-json-server/", image_name="swapi", platform="linux/x86_64"
-    ),
-)
+#image = awsx.ecr.Image(
+#    "image",
+#    awsx.ecr.ImageArgs(
+#        repository_url=repository.url, context="/root/swapi-json-server/", image_name="swapi", platform="linux/x86_64"
+#    ),
+#)
 
 ecs_cluster = aws.ecs.Cluster("cluster",
     name=var_cluster_name,)
@@ -39,7 +39,8 @@ service = awsx.ecs.FargateService("service",
         task_definition_args=awsx.ecs.FargateServiceTaskDefinitionArgs(
             container=awsx.ecs.TaskDefinitionContainerDefinitionArgs(
                 name=var_service_name,
-                image=image.image_uri,
+#                image=image.image_uri,
+                image="nginx",
                 cpu=2048,
                 memory=4096,
                 essential=True,
