@@ -39,4 +39,5 @@ eks_cluster = eks.Cluster(cluster_name,
 ##pulumi stack output kubeconfig --show-secrets > kubeconfig.json
 # Export values to use elsewhere
 pulumi.export("kubeconfig", eks_cluster.kubeconfig)
+pulumi.export("kubeconfig2", eks_cluster)
 pulumi.export("vpcId", eks_vpc.vpc_id)
