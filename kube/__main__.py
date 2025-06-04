@@ -1,5 +1,6 @@
 import pulumi
 import pulumi_awsx as awsx
+import pulumi_aws as aws
 import pulumi_eks as eks
 
 # Get some values from the Pulumi configuration (or use defaults)
@@ -37,7 +38,24 @@ eks_cluster = eks.Cluster(cluster_name,
     # endpoint_public_access=false
     )
 
+#alb = awsx.lb.ApplicationLoadBalancer(
+#    "lb",
+#    awsx.lb.ApplicationLoadBalancerArgs(
+#        listener=awsx.lb.ListenerArgs(
+#            port=80,
+#        ),
+#    ),
+#)
+
+# Export the resulting URL so that it's easy to access.
+#pulumi.export("endpoint", alb.load_balancer.dns_name)
+
+pulumi.export("foo", eks_cluster)
+
+
 ##pulumi stack output kubeconfig --show-secrets > kubeconfig.json
 # Export values to use elsewhere
 pulumi.export("kubeconfig", eks_cluster.kubeconfig)
 pulumi.export("vpcId", eks_vpc)
+pulumi.export("vpcPrivateSubnetIds", eks_vpc.private_subnet_ids)
+pulumi.export("vpcPublicSubnetIds", eks_vpc.public_subnet_ids)
