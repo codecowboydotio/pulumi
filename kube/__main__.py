@@ -56,6 +56,11 @@ pulumi.export("foo", eks_cluster)
 ##pulumi stack output kubeconfig --show-secrets > kubeconfig.json
 # Export values to use elsewhere
 pulumi.export("kubeconfig", eks_cluster.kubeconfig)
+<<<<<<< HEAD
 pulumi.export("vpcId", eks_vpc)
 pulumi.export("vpcPrivateSubnetIds", eks_vpc.private_subnet_ids)
 pulumi.export("vpcPublicSubnetIds", eks_vpc.public_subnet_ids)
+=======
+pulumi.export("kubeconfig2", eks_cluster)
+pulumi.export("vpcId", eks_vpc.vpc_id)
+>>>>>>> 38a6bf7e33a45e8224072ce576ba3c79332448c3
