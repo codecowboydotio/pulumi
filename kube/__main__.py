@@ -13,7 +13,8 @@ vpc_network_cidr = config.get("vpcNetworkCidr", "10.0.0.0/16")
 cluster_name = config.get("name")
 
 # Create a VPC for the EKS cluster
-eks_vpc = awsx.ec2.Vpc("svk-eks-vpc",
+eks_vpc = awsx.ec2.Vpc(
+    cluster_name + "-vpc",
     enable_dns_hostnames=True,
     cidr_block=vpc_network_cidr)
 
@@ -55,7 +56,7 @@ pulumi.export("foo", eks_cluster)
 
 ##pulumi stack output kubeconfig --show-secrets > kubeconfig.json
 # Export values to use elsewhere
-#pulumi.export("kubeconfig", eks_cluster.kubeconfig)
+pulumi.export("kubeconfig", eks_cluster.kubeconfig)
 pulumi.export("vpcId", eks_vpc)
 pulumi.export("vpcPrivateSubnetIds", eks_vpc.private_subnet_ids)
 pulumi.export("vpcPublicSubnetIds", eks_vpc.public_subnet_ids)

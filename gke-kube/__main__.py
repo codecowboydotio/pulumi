@@ -8,17 +8,18 @@ gcp_region = provider_cfg.get("region", "us-central1")
 # Get some additional configuration values
 config = pulumi.Config()
 nodes_per_zone = config.get_int("nodesPerZone", 1)
+prefix = config.get("prefix")
 
 # Create a new network
 gke_network = gcp.compute.Network(
-    "gke-network",
+    "svk-gke-network",
     auto_create_subnetworks=False,
     description="A virtual network for your GKE cluster(s)"
 )
 
 # Create a subnet in the new network
 gke_subnet = gcp.compute.Subnetwork(
-    "gke-subnet",
+    "svk-gke-subnet",
     ip_cidr_range="10.128.0.0/12",
     network=gke_network.id,
     private_ip_google_access=True
@@ -26,7 +27,7 @@ gke_subnet = gcp.compute.Subnetwork(
 
 # Create a cluster in the new network and subnet
 gke_cluster = gcp.container.Cluster(
-    "gke-cluster",
+    "svk-gke-cluster",
     addons_config={
         "dns_cache_config": {
             "enabled": True
@@ -69,14 +70,15 @@ gke_cluster = gcp.container.Cluster(
 
 # Create a GCP service account for the nodepool
 gke_nodepool_sa = gcp.serviceaccount.Account(
-    "gke-nodepool-sa",
-    account_id=pulumi.Output.concat(gke_cluster.name, "-np-1-sa"),
+    "svk-gke-nodepool-sa",
+    account_id=pulumi.Output.concat(prefix, "-np-1-sa"),
+    #account_id=pulumi.Output.concat(gke_cluster.name, "-np-1-sa"),
     display_name="Nodepool 1 Service Account"
 )
 
 # Create a nodepool for the cluster
 gke_nodepool = gcp.container.NodePool(
-    "gke-nodepool",
+    "svk-gke-nodepool",
     cluster=gke_cluster.id,
     node_count=nodes_per_zone,
     node_config={
