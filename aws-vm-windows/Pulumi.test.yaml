@@ -1,0 +1,9 @@
+config:
+  aws:region: us-east-1
+  aws:profile: default
+  aws:defaultTags:
+    tags:
+      expirationDate: "2025-08-01"
+      owner: "scott.vankalken"
+      purpose: "testing"
+

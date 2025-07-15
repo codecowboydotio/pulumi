@@ -1,0 +1,9 @@
+config:
+  aws:region: us-east-1
+  name: csit-test-vm
+  aws:defaultTags:
+    tags:
+      approver: "marc.brown"
+      expirationDate: "2025-08-01"
+      owner: "scott.vankalken"
+      purpose: "testing"

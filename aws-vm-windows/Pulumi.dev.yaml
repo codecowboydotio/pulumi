@@ -1,0 +1,10 @@
+config:
+  aws:region: us-east-1
+  aws:profile: 393238635099_poweruser
+  aws:defaultTags:
+    tags:
+      approver: "marc.brown"
+      expirationDate: "2025-08-01"
+      owner: "scott.vankalken"
+      purpose: "testing"
+
