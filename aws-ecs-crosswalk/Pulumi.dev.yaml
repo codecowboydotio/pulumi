@@ -6,7 +6,5 @@ config:
   cfg:container-port: "80"
   aws:defaultTags:
     tags:
-      approver: "marc.brown"
-      expirationDate: "never"
-      owner: "scott.vankalken"
-      purpose: "SE testing"
+      owner: "scott"
+      purpose: "testing"

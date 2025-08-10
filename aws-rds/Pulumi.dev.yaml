@@ -1,0 +1,10 @@
+config:
+  aws:region: us-east-1
+  db_name: svkdatabase 
+  db_engine: mysql 
+  engine_version: 8.0
+  instance_class: db.t4g.large
+  db_username: foo
+  db_password: foobarbaz
+  project_name: svk
+  vpc_name: db_vpc 
