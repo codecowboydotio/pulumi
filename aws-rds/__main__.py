@@ -101,7 +101,7 @@ dbsubnet = aws.rds.SubnetGroup(var_project_name + "-dbsubnet",
         "Name": "My DB subnet group",
     })
 
-my_db = aws.rds.Instance(var_project_name + "-my-db",
+my_db = aws.rds.Instance(var_project_name + "-db",
     allocated_storage=10,
     db_name=db_name,
     engine=db_engine,

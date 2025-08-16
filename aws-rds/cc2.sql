@@ -16,7 +16,6 @@ use cards_test;
 
 #GRANT ALL PRIVILEGES ON cards_test TO 'cards_test'@'localhost' IDENTIFIED BY 'password';
 
-INSERT INTO card_data (type, brand, number, date, name, CVV, pin) VALUES ('type', 'brand', 'number', 'date', 'name', 'CVV', 'pin');
 INSERT INTO card_data (type, brand, number, date, name, CVV, pin) VALUES ('CREDIT', 'VISA', '4415 1715 1869 9236', '01/2030', 'Francie Didamo', '442', '9563');
 INSERT INTO card_data (type, brand, number, date, name, CVV, pin) VALUES ('CREDIT', 'AMERICAN EXPRESS', '3783 028947 49369', '09/2030', 'Federico Wallin', '5533', '1711');
 INSERT INTO card_data (type, brand, number, date, name, CVV, pin) VALUES ('DEBIT', 'UNIONPAY', '6284 0610 4814 5961', '10/2028', 'Elvina Palifka', '879', '1903');
