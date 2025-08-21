@@ -2,12 +2,9 @@
 
 import pulumi
 import pulumi_aws as aws
-import json
-import time
-import requests
 
 var_size = 't2.micro'
-var_project_name = "svk-vm"
+var_project_name = "svk-harbor"
 var_vpc_name = "vpc"
 var_key_name = 'svk-keypair'
 var_vpc_cidr_block = '10.100.0.0/16'
@@ -80,17 +77,14 @@ group = aws.ec2.SecurityGroup(var_project_name + "-sg",
     vpc_id = vpc.id,
         ingress = [
           aws.ec2.SecurityGroupIngressArgs(
-            description = 'telnet', protocol='tcp', from_port=23, to_port=23, cidr_blocks=['0.0.0.0/0'],
+            description = 'http', protocol='tcp', from_port=80, to_port=80, cidr_blocks=['0.0.0.0/0'],
+          ),
+          aws.ec2.SecurityGroupIngressArgs(
+            description = 'https', protocol='tcp', from_port=443, to_port=443, cidr_blocks=['0.0.0.0/0'],
           ),
           aws.ec2.SecurityGroupIngressArgs(
             description = 'ssh', protocol='tcp', from_port=22, to_port=22, cidr_blocks=['0.0.0.0/0'],
           ),
-          aws.ec2.SecurityGroupIngressArgs(
-            description = 'jenkins', protocol='tcp', from_port=8080, to_port=8080, cidr_blocks=['0.0.0.0/0'],
-          ),
-          aws.ec2.SecurityGroupIngressArgs(
-            description = 'rdp', protocol='tcp', from_port=3389, to_port=3389, cidr_blocks=['0.0.0.0/0'],
-          )
         ],
         egress = [aws.ec2.SecurityGroupEgressArgs(
             protocol=-1,
@@ -105,34 +99,65 @@ group = aws.ec2.SecurityGroup(var_project_name + "-sg",
 )
 
 user_data="""#!/bin/bash
-apt install -y nikto
 sudo apt update -y
 sudo apt upgrade -y
-git clone https://github.com/codecowboydotio/pacman-unit
+sudo apt-get install docker.io -y
+apt-get install jq -y
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+cd /root/
+wget https://github.com/goharbor/harbor/releases/download/v2.13.1/harbor-online-installer-v2.13.1.tgz
+tar xzvf harbor-online-installer-v2.13.1.tgz
+cd harbor
+mkdir /data/
+mkdir /data/cert/
+
+HOSTNAME=$(curl -s www.httpbin.org/ip | jq -r .origin)
+sed "s/hostname: reg.mydomain.com/hostname: $HOSTNAME/g" harbor.yml.tmpl  > harbor.tmp
+sed "s|  certificate: /your/certificate/path|  certificate: /data/cert/yourdomain.com.crt|g" harbor.tmp > harbor.tmp2 
+sed "s|  private_key: /your/private/key/path|  private_key: /data/cert/yourdomain.com.key|g" harbor.tmp2 > harbor.yml
+
+openssl genrsa -out ca.key 4096
+openssl req -x509 -new -nodes -sha512 -days 3650 \
+ -subj "/C=CN/ST=here/L=there/O=example/OU=Personal/CN=yourdomain.com" \
+ -key ca.key \
+ -out ca.crt
+openssl genrsa -out yourdomain.com.key 4096
+openssl req -sha512 -new \
+    -subj "/C=CN/ST=here/L=there/O=example/OU=Personal/CN=yourdomain.com" \
+    -key yourdomain.com.key \
+    -out yourdomain.com.csr
+cat > v3.ext <<-EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1=yourdomain.com
+DNS.2=yourdomain
+DNS.3=hostname
+EOF
+
+echo "IP.1=$HOSTNAME" >> v3.ext
+
+openssl x509 -req -sha512 -days 3650 \
+    -extfile v3.ext \
+    -CA ca.crt -CAkey ca.key -CAcreateserial \
+    -in yourdomain.com.csr \
+    -out yourdomain.com.crt
+cp yourdomain.com.crt /data/cert/
+cp yourdomain.com.key /data/cert/
+
+openssl x509 -inform PEM -in yourdomain.com.crt -out yourdomain.com.cert
+mkdir -p /etc/docker/certs.d/yourdomain.com/
+cp yourdomain.com.cert /etc/docker/certs.d/yourdomain.com/
+cp yourdomain.com.key /etc/docker/certs.d/yourdomain.com/
+cp ca.crt /etc/docker/certs.d/yourdomain.com/
+
+./install.sh
 """
-
-def health_check(args: pulumi.ResourceHookArgs):
-    # Since this is an after hook, we'll have access to the new outputs of the
-    # resource.
-    outputs = args.new_outputs
-
-    # Attempt to fetch health.json from the instance's public endpoint, backing
-    # off linearly if it is not yet available.
-    max_retries = 30
-    for i in range(max_retries):
-        try:
-            response = requests.get(
-                f"http://{outputs['public_dns']}", timeout=10
-            )
-            if response.status_code == 200:
-                data = response.json()
-                print(f"Health check passed: {json.dumps(data)}")
-                return
-        except Exception as error:
-            print(f"Health check attempt {i + 1} failed: {error}")
-
-        # Linear backoff - wait (i + 1) seconds before next attempt
-        time.sleep(i + 1)
 
 server = aws.ec2.Instance(var_project_name + '-server',
     instance_type=var_size,
@@ -144,12 +169,6 @@ server = aws.ec2.Instance(var_project_name + '-server',
     tags={
         "Name": var_project_name + "-instance"
     },
-    opts=pulumi.ResourceOptions(
-        hooks=pulumi.ResourceHookBinding(
-            after_create=[health_check],
-            after_update=[health_check],
-        ),
-    ),
 )
 
 pulumi.export('public_ip', server.public_ip)

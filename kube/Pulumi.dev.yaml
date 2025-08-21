@@ -1,6 +1,5 @@
 config:
   aws:region: us-east-1
-  aws:profile: 393238635099_administrator
   kube:desiredClusterSize: "3"
   kube:eksNodeInstanceType: t3.xlarge
   kube:maxClusterSize: "3"
