@@ -29,7 +29,7 @@ main_subnet = aws.ec2.Subnet(var_project_name + "-subnet",
     vpc_id=vpc.id,
     cidr_block=var_subnet_cidr_block,
     map_public_ip_on_launch=True,
-    availability_zone = "us-east-1a",
+    availability_zone = "ap-southeast-2a",
     tags={
         "Name": var_project_name + "-subnet"
     }
@@ -38,7 +38,7 @@ secondary_subnet = aws.ec2.Subnet(var_project_name + "secondary-subnet",
     vpc_id=vpc.id,
     cidr_block=var_secondary_subnet_cidr_block,
     map_public_ip_on_launch=True,
-    availability_zone = "us-east-1b",
+    availability_zone = "ap-southeast-2b",
     tags={
         "Name": var_project_name + "secondary-subnet"
     }

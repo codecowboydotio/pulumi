@@ -1,5 +1,5 @@
 config:
-  aws:region: us-east-1
+  aws:region: ap-southeast-2
   db_name: svkdatabase 
   db_engine: mysql 
   engine_version: 8.0
