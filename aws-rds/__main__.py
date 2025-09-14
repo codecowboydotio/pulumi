@@ -1,5 +1,6 @@
 import pulumi
 import pulumi_aws as aws
+import pulumi_command as command
 
 # Get some values from the Pulumi configuration (or use defaults)
 config = pulumi.Config()
@@ -113,6 +114,15 @@ my_db = aws.rds.Instance(var_project_name + "-db",
     port = 3306,
     vpc_security_group_ids = [group.id],
     skip_final_snapshot=True)
+
+run_sql_script = command.local.Command("run-sql-script",
+    create=f"mysql -h {my_db.address} -u {db_username} -p{db_password} cards_test < {sql_script_path}",
+    opts=pulumi.ResourceOptions(depends_on=[
+        my_db
+        # Add dependencies on your MySQL database or other resources if necessary
+    ])
+)
+
 
 #pulumi.export("default", my_db)
 pulumi.export("address", my_db.address)
