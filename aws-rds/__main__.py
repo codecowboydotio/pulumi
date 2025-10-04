@@ -70,6 +70,10 @@ main_rt_assoc = aws.ec2.RouteTableAssociation(var_project_name + "-" + var_vpc_n
     route_table_id = main_route_table.id
 )
 
+main_rt_assoc2 = aws.ec2.RouteTableAssociation(var_project_name + "-" + var_vpc_name + "-rt2",
+    subnet_id = secondary_subnet.id,
+    route_table_id = main_route_table.id
+)
 
 group = aws.ec2.SecurityGroup(var_project_name + "-sg",
     description = var_project_name,
@@ -115,8 +119,11 @@ my_db = aws.rds.Instance(var_project_name + "-db",
     vpc_security_group_ids = [group.id],
     skip_final_snapshot=True)
 
+fooble = my_db.address.apply(lambda addr: f"mysql -h {addr} -u foo -pfoobarbaz < cc2.sql")
+
+sql_script_path='cc2.sql'
 run_sql_script = command.local.Command("run-sql-script",
-    create=f"mysql -h {my_db.address} -u {db_username} -p{db_password} cards_test < {sql_script_path}",
+    create=fooble,
     opts=pulumi.ResourceOptions(depends_on=[
         my_db
         # Add dependencies on your MySQL database or other resources if necessary
