@@ -85,9 +85,6 @@ bucket_policy_document = {
     ]
 }
 
-# Convert the Python dictionary to a JSON string
-#bucket_policy_json = json.dumps(bucket_policy_document)
-
 # Attach the bucket policy to the S3 bucket
 website_bucket_policy = aws.s3.BucketPolicy("website-bucket-policy",
     bucket=website_bucket.id, # Referencing the ID of the bucket created above
@@ -102,7 +99,7 @@ index_html = aws.s3.BucketObject("indexHtml",
     source=pulumi.FileAsset("index.html"), # Assuming an index.html file exists in the same directory
 )
 
-s3_origin_id = "myS3Origin"
+s3_origin_id=project_name + "-" + bucket_name
 distribution_resource = aws.cloudfront.Distribution("distributionResource",
     default_root_object="index.html",
     default_cache_behavior={
@@ -121,26 +118,12 @@ distribution_resource = aws.cloudfront.Distribution("distributionResource",
           "HEAD",
         ],
         "target_origin_id": s3_origin_id,
-    #    "max_ttl": 0,
-    #    "min_ttl": 0,
         "forwarded_values": {
             "cookies": {
                 "forward": "none",
             },
             "query_string": False,
-            #"headers": ["string"],
-            #"query_string_cache_keys": ["string"],
         },
-    #    "default_ttl": 0,
-    #    "field_level_encryption_id": "string",
-    #    "origin_request_policy_id": "string",
-    #    "realtime_log_config_arn": "string",
-    #    "response_headers_policy_id": "string",
-    #    "smooth_streaming": False,
-    #    "compress": False,
-    #    "trusted_key_groups": ["string"],
-    #    "trusted_signers": ["string"],
-    #    "cache_policy_id": "string",
     },
     enabled=True,
     origins=[{
@@ -157,14 +140,10 @@ distribution_resource = aws.cloudfront.Distribution("distributionResource",
         },
     },
     viewer_certificate={
-    #    "acm_certificate_arn": "string",
         "cloudfront_default_certificate": True,
-    #    "iam_certificate_id": "string",
-    #    "minimum_protocol_version": "string",
-    #    "ssl_support_method": "string",
     }
 )
 
 # Export the name of the bucket
 pulumi.export('website URL', bucket_config.website_endpoint)
-pulumi.export('dist', distribution_resource)
+pulumi.export('dist', distribution_resource.domain_name)
