@@ -90,6 +90,9 @@ group = aws.ec2.SecurityGroup(var_project_name + "-sg",
           ),
           aws.ec2.SecurityGroupIngressArgs(
             description = 'rdp', protocol='tcp', from_port=3389, to_port=3389, cidr_blocks=['0.0.0.0/0'],
+          ),
+          aws.ec2.SecurityGroupIngressArgs(
+            description = 'www', protocol='tcp', from_port=80, to_port=80, cidr_blocks=['0.0.0.0/0'],
           )
         ],
         egress = [aws.ec2.SecurityGroupEgressArgs(
@@ -108,31 +111,35 @@ user_data="""#!/bin/bash
 apt install -y nikto
 sudo apt update -y
 sudo apt upgrade -y
-git clone https://github.com/codecowboydotio/pacman-unit
+sudo apt install -y apache2
+systemctl start apache2
+git clone https://github.com/codecowboydotio/pacman-unit /root/pacman-unit
+cd /root/pacman-unit
+cp -pR /root/pacman-unit/* /var/www/html
 """
 
-def health_check(args: pulumi.ResourceHookArgs):
-    # Since this is an after hook, we'll have access to the new outputs of the
-    # resource.
-    outputs = args.new_outputs
-
-    # Attempt to fetch health.json from the instance's public endpoint, backing
-    # off linearly if it is not yet available.
-    max_retries = 30
-    for i in range(max_retries):
-        try:
-            response = requests.get(
-                f"http://{outputs['public_dns']}", timeout=10
-            )
-            if response.status_code == 200:
-                data = response.json()
-                print(f"Health check passed: {json.dumps(data)}")
-                return
-        except Exception as error:
-            print(f"Health check attempt {i + 1} failed: {error}")
-
-        # Linear backoff - wait (i + 1) seconds before next attempt
-        time.sleep(i + 1)
+#def health_check(args: pulumi.ResourceHookArgs):
+#    # Since this is an after hook, we'll have access to the new outputs of the
+#    # resource.
+#    outputs = args.new_outputs
+#
+#    # Attempt to fetch health.json from the instance's public endpoint, backing
+#    # off linearly if it is not yet available.
+#    max_retries = 30
+#    for i in range(max_retries):
+#        try:
+#            response = requests.get(
+#                f"http://{outputs['public_dns']}", timeout=10
+#            )
+#            if response.status_code == 200:
+#                data = response.json()
+#                print(f"Health check passed: {json.dumps(data)}")
+#                return
+#        except Exception as error:
+#            print(f"Health check attempt {i + 1} failed: {error}")
+#
+#        # Linear backoff - wait (i + 1) seconds before next attempt
+#        time.sleep(i + 1)
 
 server = aws.ec2.Instance(var_project_name + '-server',
     instance_type=var_size,
@@ -144,12 +151,12 @@ server = aws.ec2.Instance(var_project_name + '-server',
     tags={
         "Name": var_project_name + "-instance"
     },
-    opts=pulumi.ResourceOptions(
-        hooks=pulumi.ResourceHookBinding(
-            after_create=[health_check],
-            after_update=[health_check],
-        ),
-    ),
+    #opts=pulumi.ResourceOptions(
+    #    hooks=pulumi.ResourceHookBinding(
+    #        after_create=[health_check],
+    #        after_update=[health_check],
+    #    ),
+    #),
 )
 
 pulumi.export('public_ip', server.public_ip)
